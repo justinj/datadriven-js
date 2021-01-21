@@ -1,0 +1,15 @@
+double
+foo
+----
+foo
+foo
+
+# comment
+
+double
+bar
+----
+bar
+bar
+
+# Comment
