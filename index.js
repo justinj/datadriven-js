@@ -37,7 +37,7 @@ const run = function (fname, f) {
     let sep = "";
     for (let cmd of parsed) {
       switch (cmd.type) {
-        case "test_case":
+        case TEST_CASE:
           let result = f({
             directive: module.exports.parseDirective(cmd.directive),
             input: cmd.input.trim(),
@@ -59,7 +59,7 @@ const run = function (fname, f) {
           }
           buf += "\n";
           break;
-        case "blank":
+        case BLANK:
           sep = "";
           buf += cmd.value + "\n";
           break;
@@ -69,7 +69,7 @@ const run = function (fname, f) {
   } else {
     for (let cmd of parsed) {
       switch (cmd.type) {
-        case "test_case":
+        case TEST_CASE:
           let result = f({
             directive: module.exports.parseDirective(cmd.directive),
             input: cmd.input.trim(),
@@ -80,13 +80,15 @@ const run = function (fname, f) {
   }
 };
 
+const isWordChar = (ch) => ch.match(/[-\w_]/);
+
 const parse = function* (tf) {
   let value;
   let done = false;
   let ls = lines(tf);
   ({ value, done } = ls.next());
   while (!done) {
-    if (value.match(/^\s*\w/)) {
+    if (value.match(/^\s*[-\w_]/)) {
       let directive = value;
       let input = "";
       ({ value, done } = ls.next());
@@ -139,7 +141,7 @@ const parseDirective = function (dir) {
   };
   let nextWord = () => {
     let start = i;
-    while (i < dir.length && dir[i].match(/\w/)) {
+    while (i < dir.length && isWordChar(dir[i])) {
       i++;
     }
     let w = dir.slice(start, i);
@@ -151,7 +153,7 @@ const parseDirective = function (dir) {
   let args = [];
   munch();
   while (i < dir.length) {
-    if (dir[i].match(/\w/)) {
+    if (isWordChar(dir[i])) {
       let flag = nextWord();
       let vars = [];
       munch();
@@ -173,7 +175,7 @@ const parseDirective = function (dir) {
           i++;
           munch();
         } else {
-          if (i >= dir.length || !dir[i].match(/\w/)) {
+          if (i >= dir.length || !isWordChar(dir[i])) {
             throw new Error("invalid argument");
           }
           vars.push(nextWord());
